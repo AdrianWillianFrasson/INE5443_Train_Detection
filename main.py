@@ -5,6 +5,7 @@ import numpy as np
 # -----------------------------------------------------------------------------
 IMAGE_FOLDER = "./dataset/images/00/"
 IMAGE_BACKGROUND = "./dataset/empty.png"
+EXPORT_FOLDER = "./export/"
 
 
 # -----------------------------------------------------------------------------
@@ -25,6 +26,7 @@ def show_log(trains):
         text = f"{train["name"]}: {train["status"]} - {train["station"]}"
         cv.putText(log, text, (10, 75 + 20*i), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
 
+    cv.imwrite(f"{EXPORT_FOLDER}9_log.png", log)
     cv.imshow("log", log)
 
 
@@ -147,13 +149,19 @@ def train_detection(image, background):
     image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     background_gray = cv.cvtColor(background, cv.COLOR_BGR2GRAY)
 
+    cv.imwrite(f"{EXPORT_FOLDER}3_base_gray.png", background_gray)
+    cv.imwrite(f"{EXPORT_FOLDER}4_test_gray.png", image_gray)
+
     output = cv.subtract(image_gray, background_gray)
+    cv.imwrite(f"{EXPORT_FOLDER}5_subtract.png", output)
 
     output_names = cv.threshold(output, 80, 255, cv.THRESH_BINARY)[1]
+    cv.imwrite(f"{EXPORT_FOLDER}6_threshold.png", output_names)
 
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (20, 20))
 
     output = cv.dilate(output_names, kernel)
+    cv.imwrite(f"{EXPORT_FOLDER}7_dilate.png", output)
 
     contours, _ = cv.findContours(output, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
@@ -180,11 +188,15 @@ def image_processing(image_path):
     image = cv.imread(image_path)
     background = cv.imread(IMAGE_BACKGROUND)
 
+    cv.imwrite(f"{EXPORT_FOLDER}1_base.png", background)
+    cv.imwrite(f"{EXPORT_FOLDER}2_test.png", image)
+
     trains = train_detection(image, background)
 
     draw_bounding_box(trains, image)
     show_log(trains)
 
+    cv.imwrite(f"{EXPORT_FOLDER}8_bounding_box.png", image)
     cv.imshow("output1", image)
 
 

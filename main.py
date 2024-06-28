@@ -13,7 +13,15 @@ def draw_bounding_box(trains, image):
     for train in trains:
         x, y, w, h = train["bounding"]
         cv.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 4)
-        cv.putText(image, train["name"], (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        if train["status"] == "Line 1":
+            name_position = (x, y - 20)
+        elif train["status"] == "Line 2":
+            name_position = (x, y + h + 60)
+        else:
+            name_position = (x + 100, int(y + h/2))
+
+        cv.putText(image, train["name"], name_position, cv.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
 
 def show_log(trains):
@@ -159,12 +167,10 @@ def train_detection(image, background):
     cv.imwrite(f"{EXPORT_FOLDER}6_threshold.png", output_names)
 
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (20, 20))
-
     output = cv.dilate(output_names, kernel)
     cv.imwrite(f"{EXPORT_FOLDER}7_dilate.png", output)
 
     contours, _ = cv.findContours(output, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
     boundings = list(map(lambda contour: cv.boundingRect(contour), contours))
 
     trains_boundings = list()
